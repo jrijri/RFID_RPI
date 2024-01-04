@@ -6,7 +6,7 @@ La fonction d'écriture permet de stocker sur la carte de nouvelles données.
 L'interface peut être manuelle par ligne de commande ou utiliser l'interface graphique écrite en Python/Tkinter et fonctionnant sur un hote (RPI ou PC).
 
 Montage de test :
-   + RPI Nano monté sur une platine de test
+   + RPI Pico monté sur une platine de test
    + Carte RFID-RC522 montée sur la même platine
 
 Activées :
