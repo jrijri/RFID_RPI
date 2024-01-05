@@ -9,7 +9,8 @@ from RfidAccess import RfidAccess
 from sys import stdin
 import utime
 
-FORGET_TIME  =  5000                                                 # time to forget one card
+APP_VERSION  = '1.0.0'
+FORGET_TIME  =  5000                                                 # time to forget one command (in ms)
 BLOCK_SIZE   = 16
 MAX_BLOCKS   = 16
 
@@ -23,7 +24,6 @@ iRst      = 22                                                       # RST signa
 
 zReader   = MFRC522(spi_id = 0, sck = iSck, miso = iCipo, mosi = iCopi, cs = iSda, rst = iRst)
 zAccess   = RfidAccess()
-zLastCard = [0]                                                      # Last seen card
 
 def readData(zUid):
   """
@@ -84,7 +84,6 @@ def getTag():
       Read the card tag and UID if there is one close.
       Display the metadata of the card (tag and UID)
   """
-  global zLastCard
   global zReader
   iStatus = zReader.NOTAGERR
   zUid    = None
@@ -94,13 +93,11 @@ def getTag():
     (iStatus, iTag_type) = zReader.request(zReader.REQIDL)
     if iStatus == zReader.OK:
       (iStatus, zUid) = zReader.SelectTagSN()
-      if zLastCard != zUid and zUid != []:
+      if zUid != []:
         print('Tag = ', iTag_type)
         print("Card {}  UID = {}".format(hex(int.from_bytes(bytes(zUid),
                                          "little", False)).upper(),
                                          zReader.tohexstring(zUid)))
-    else:
-      zLastCard = [0]                                                # If not continous signal, reset the UID
     return(iStatus, zUid)
   except KeyboardInterrupt:
     print('\nApplication ended.')
@@ -111,34 +108,33 @@ def run_app():
   """
       Main loop of the application, check the card and button status.
   """
-  global zLastCard
-  iLastEvent = 0                                                     # Time of the last event (read|write)
-
+  
   print("\nApplication started\n")
   iLed.off()
   while True:
-    szAction = stdin.readline().strip()
+    szAction   = stdin.readline().strip()                            # wait for the client command
+    iStatus    = zReader.NOTAGERR                                    # set the Status to not OK value
+    iLastEvent = utime.ticks_ms()                                    # stamp the command time
+    print('\n\tCommand = {}\n'.format(szAction))
+    if szAction == '*IDN?':                                          # Identification process
+      print('RFID_PRI Pico, Version {}\n'.format(APP_VERSION))
     if szAction == "READ":                                           # Read process
-      (iStatus, zUid) = getTag()
+      while (iStatus != zReader.OK) and ((utime.ticks_ms() - iLastEvent) <= FORGET_TIME):
+        (iStatus, zUid) = getTag()                                   # wait for the card to be available
       if iStatus == zReader.OK:
-        if zLastCard != zUid:
-          readData(zUid)
-          iLastEvent = utime.ticks_us()                              # tag this new event
-          zLastCard = zUid                                           # Update last Card UID
+        readData(zUid)
+      else:
+        print('Tag = -1\n')                                          # No card available
     if szAction == "WRITE":                                          # Write process
       iLed.on()
-      print('\n')
-      szData = stdin.readline().strip()
-      (iStatus, zUid) = getTag()
+      szData = stdin.readline().strip()                              # Read the data associated to the Write command
+      while (iStatus != zReader.OK) and ((utime.ticks_ms() - iLastEvent) <= FORGET_TIME):
+        (iStatus, zUid) = getTag()                                   # wait for the card to be available
       if iStatus == zReader.OK:
-        if zLastCard != zUid:
-          writeData(zUid, szData)
-          iLastEvent = utime.ticks_us()                              # tag this new event
-          zLastCard = zUid                                           # Update last Card UID
+        writeData(zUid, szData)
+      else:
+        print('Tag = -1\n')                                          # No card available
       iLed.off()
-    utime.sleep_ms(50)                                               # Slow down the loop in ms
-    if ((utime.ticks_us() - iLastEvent) > FORGET_TIME):
-      zLastCard = [0]                                                # Forget the last card ID
 
 if __name__ == "__main__":
   run_app()

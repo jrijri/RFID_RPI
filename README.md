@@ -12,8 +12,12 @@ Montage de test :
 Activées :
    + Lecture des tags : Commande READ
    + Ecriture des tags : Commande WRITE suivi de l'ensemble des données à écrire
+   + Identification de l'application : Commande *IDN? - Permet de vérifier que l'application fonctionne
 
 A faire :
    + On peut envisager transmettre automatiquement les données vers JMRI afin que la nouvelle loco soit prise en charge automatiquement.
+
+Versions :
+   + 1.0.0: 2024-01-05. Ajout de la commande d'identification. Ajout du temps d'attente pour présenter une carte après une commande. Suppression de la mémorisation de la dernière carte lue/écrite.
 
 Problèmes connus :
