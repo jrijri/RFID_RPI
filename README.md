@@ -1,4 +1,4 @@
-Routines de lecture-écriture sur un tag RFID pour des applications en modélisme ferroviaire.
+# Routines de lecture-écriture sur un tag RFID pour des applications en modélisme ferroviaire.
 Cette application est destinée à être pilotée via le monitor série (port USB) du RPI Pico.
 
 Une application possible est de détecter un engin (locomotive) par la lecture de sa carte. On peut ainsi récupérer les données utiles comme l'adresse DCC.
@@ -19,5 +19,7 @@ A faire :
 
 Versions :
    + 1.0.0: 2024-01-05. Ajout de la commande d'identification. Ajout du temps d'attente pour présenter une carte après une commande. Suppression de la mémorisation de la dernière carte lue/écrite.
+   + 1.0.1: 2024-01-09. Adaptation du format des données pour l'utilisation avec RFID_Host_GUI
 
 Problèmes connus :
+   + Ouvert...

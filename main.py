@@ -34,7 +34,6 @@ def readData(zUid):
 
   zDefaultKey     = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF]
   zReader.MFRC522_DumpClassic1K(zUid, Start = 0, End = 64, keyB = zDefaultKey)
-  print("Done")
 
 def writeData(zUid, szData):
   """ 
@@ -45,9 +44,13 @@ def writeData(zUid, szData):
   global zReader
   global zAccess
   
-  szWords = [szData[iInd : iInd + BLOCK_SIZE] for iInd in range(0, len(szData), BLOCK_SIZE)]
+  szWords = szData.split('#')
+  #szWords = [szData[iInd : iInd + BLOCK_SIZE] for iInd in range(0, len(szData), BLOCK_SIZE)]
   iSize   = len(szWords)
-  szWords[iSize - 1] = szWords[iSize - 1] + ' ' * (BLOCK_SIZE - len(szWords[iSize - 1]))
+  print('Data = {}, size = {}\n'.format(szWords, iSize))
+  for iInd in range(0, iSize):
+    szWords[iInd] = szWords[iInd] + ' ' * (BLOCK_SIZE - len(szWords[iInd]))    # Add empty spaces to fill the BLOCK_SIZE
+    print(' Word[{}] = {},\t'.format(iInd, szWords[iInd]))
 
   if iSize > MAX_BLOCKS:
     print('Too many data, abording!\n')
@@ -74,9 +77,9 @@ def writeData(zUid, szData):
         else:
           zDataBlock = 16 * [0]
         zReader.writeSectorBlock(zUid, iSector, iBlock, zDataBlock, keyB = zDefaultKey)
-      print(".", end = "")
+#      print(".", end = "")
   print('\n\tCard written.\n')
-  zReader.MFRC522_DumpClassic1K(zUid, Start = 0, End = 64, keyB = zDefaultKey)
+#  zReader.MFRC522_DumpClassic1K(zUid, Start = 0, End = 64, keyB = zDefaultKey)
 
 
 def getTag():
@@ -135,6 +138,8 @@ def run_app():
       else:
         print('Tag = -1\n')                                          # No card available
       iLed.off()
+    print("Done")                                                    # End message used by the client application
+
 
 if __name__ == "__main__":
   run_app()
